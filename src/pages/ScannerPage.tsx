@@ -1,6 +1,6 @@
-import { Button } from "@/components/ui/button"
-import { useCallback, useEffect, useRef, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import Webcam from "react-webcam"
+import { RiArrowLeftLine, RiSettings3Line } from "@remixicon/react"
 
 const ScannerPage = () => {
   const webcamRef = useRef<Webcam>(null)
@@ -17,11 +17,6 @@ const ScannerPage = () => {
     return () => window.removeEventListener("resize", handleResize)
   }, [])
 
-  const capture = useCallback(() => {
-    const imageSrc = webcamRef.current!.getScreenshot()
-    console.log(imageSrc)
-  }, [webcamRef])
-
   if (!isMobile) {
     return (
       <div className="flex flex-col items-center justify-center p-8 text-center min-h-[50vh]">
@@ -35,20 +30,47 @@ const ScannerPage = () => {
   }
 
   return (
-    <div className="flex flex-col items-center gap-4 w-full p-4 mx-auto max-w-md">
+    <div className="relative w-full h-[100dvh] bg-black overflow-hidden flex flex-col">
+      {/* Top Bar Layer */}
+      <div className="absolute top-0 inset-x-0 h-[60px] bg-[#2f6634] flex items-center justify-between px-4 z-20 shadow-md">
+        <button 
+          onClick={() => window.history.back()}
+          className="p-1.5 hover:bg-white/10 rounded-full transition-colors"
+        >
+          <RiArrowLeftLine className="text-white w-6 h-6" />
+        </button>
+        <span className="text-white font-bold tracking-[0.15em] text-[15px]">SCANNING</span>
+        <button className="p-1.5 hover:bg-white/10 rounded-full transition-colors">
+          <RiSettings3Line className="text-white w-6 h-6" />
+        </button>
+      </div>
+
       <Webcam 
         ref={webcamRef}
         screenshotFormat="image/jpeg"
         videoConstraints={{
-          width:  720,
-          height: 1280,
           facingMode: "environment"
         }}
-        className="w-full h-auto rounded-lg shadow-sm"
+        className="absolute inset-0 w-full h-full object-cover"
       />
-      <Button onClick={capture} className="w-full">
-        Capture
-      </Button>
+
+      {/* Overlay Mask with Cutout */}
+      <div className="absolute inset-0 pt-[60px] pointer-events-none z-10 overflow-hidden">
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[88%] max-w-[420px] aspect-[1/1.414] shadow-[0_0_0_9999px_rgba(0,0,0,0.55)]">
+          {/* Top-Left Viewfinder */}
+          <div className="absolute top-0 left-0 w-20 h-20 sm:w-24 sm:h-24 bg-white/40 backdrop-blur-[1px]">
+          </div>
+          {/* Top-Right Viewfinder */}
+          <div className="absolute top-0 right-0 w-20 h-20 sm:w-24 sm:h-24 bg-white/40 backdrop-blur-[1px]">
+          </div>
+          {/* Bottom-Left Viewfinder */}
+          <div className="absolute bottom-0 left-0 w-20 h-20 sm:w-24 sm:h-24 bg-white/40 backdrop-blur-[1px]">
+          </div>
+          {/* Bottom-Right Viewfinder */}
+          <div className="absolute bottom-0 right-0 w-20 h-20 sm:w-24 sm:h-24 bg-white/40 backdrop-blur-[1px]">
+          </div>
+        </div>
+      </div>
     </div>
   )
 }
